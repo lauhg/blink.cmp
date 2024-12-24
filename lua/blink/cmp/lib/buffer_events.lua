@@ -39,10 +39,12 @@ function buffer_events:listen(opts)
   local snippet = require('blink.cmp.config').snippets
 
   local last_char = ''
+  local chars = ''
   vim.api.nvim_create_autocmd('InsertCharPre', {
     callback = function()
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
       last_char = vim.v.char
+      chars = chars .. last_char
     end,
   })
 
@@ -55,11 +57,16 @@ function buffer_events:listen(opts)
       self.ignore_next_text_changed = false
 
       -- no characters added so let cursormoved handle it
-      if last_char == '' then return end
+      if last_char == '' or #chars > 1 then
+        last_char = ''
+        chars = ''
+        return
+      end
 
       opts.on_char_added(last_char, is_ignored)
 
       last_char = ''
+      chars = ''
     end,
   })
 
