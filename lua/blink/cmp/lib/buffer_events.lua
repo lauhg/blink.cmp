@@ -56,8 +56,20 @@ function buffer_events:listen(opts)
       local is_ignored = self.ignore_next_text_changed
       self.ignore_next_text_changed = false
 
+      local excluded_chars = {
+        ['('] = true,
+        [')'] = true,
+        ['['] = true,
+        [']'] = true,
+        ['{'] = true,
+        ['}'] = true,
+        ["'"] = true,
+        ['"'] = true,
+        ['`'] = true,
+      }
+
       -- no characters added so let cursormoved handle it
-      if last_char == '' or #chars > 1 then
+      if last_char == '' or (#chars > 1 and not excluded_chars[last_char]) then
         last_char = ''
         chars = ''
         return
